@@ -9,7 +9,13 @@ const Login = () => {
     const handleLoginUser = (userProfile) => {
         // Simulate login and store full profile
         sessionStorage.setItem('currentUser', JSON.stringify(userProfile));
-        navigate('/dashboard');
+
+        // Redirect based on role
+        if (userProfile.role === 'engineer') {
+            navigate('/engineer/dashboard');
+        } else {
+            navigate('/dashboard');
+        }
     };
 
     const handleDemoLogin = (role) => {
@@ -33,7 +39,13 @@ const Login = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         // Default fallback if typed manually
-        handleLoginUser({ name: 'John Smith', role: 'superadmin', roleName: 'Super Admin', avatar: 'JS' });
+        // Check if username implies engineer for manual entry fallback
+        const role = username.toLowerCase().includes('engineer') ? 'engineer' : 'superadmin';
+        const profile = role === 'engineer'
+            ? { name: 'David Lee', role: 'engineer', roleName: 'Site Engineer', avatar: 'DL' }
+            : { name: 'John Smith', role: 'superadmin', roleName: 'Super Admin', avatar: 'JS' };
+
+        handleLoginUser(profile);
     };
 
     return (

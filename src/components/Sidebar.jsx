@@ -13,14 +13,14 @@ const Sidebar = ({ collapsed }) => {
         }
     }, []);
 
-    // Define All Menu Items with 'roles' array indicating who can see them
-    // If no 'roles' property, everyone sees it.
-    const allMenuItems = [
+    // 1. Menu Items for Admins (Super Admin & Project Manager)
+    // We use the 'roles' property to further filter between Super Admin and PM
+    const adminItems = [
         { header: 'CORE MODULES' },
         { name: 'Dashboard', path: '/dashboard', icon: 'fas fa-tachometer-alt' },
         { name: 'Projects', path: '/projects', icon: 'fas fa-project-diagram' },
         { name: 'Task Management', path: '/tasks', icon: 'fas fa-tasks' },
-        { name: 'Site Monitoring', path: '/monitoring', icon: 'fas fa-eye' },
+        { name: 'Daily Site Logs', path: '/monitoring', icon: 'fas fa-clipboard-list' }, // Renamed from Site Monitoring
 
         { header: 'RESOURCES' },
         { name: 'Labour Management', path: '/labour', icon: 'fas fa-users' },
@@ -44,11 +44,37 @@ const Sidebar = ({ collapsed }) => {
         { name: 'Settings', path: '/settings', icon: 'fas fa-cog', roles: ['superadmin'] },
     ];
 
-    // Filter Items
-    const visibleItems = allMenuItems.filter(item => {
-        if (!item.roles) return true;
-        return item.roles.includes(role);
-    });
+    // 2. Dedicated Menu for Site Engineers (Field View)
+    const siteManagerItems = [
+        { header: 'SITE EXECUTION' },
+        { name: 'My Dashboard', path: '/engineer/dashboard', icon: 'fas fa-home' },
+        { name: 'My Projects', path: '/engineer/projects', icon: 'fas fa-hard-hat' },
+        { name: 'My Tasks', path: '/engineer/tasks', icon: 'fas fa-clipboard-list' },
+
+        { header: 'DAILY UPDATES' },
+        { name: 'Daily Task Update', path: '/engineer/updates', icon: 'fas fa-edit' },
+        { name: 'Upload Photos', path: '/engineer/photos', icon: 'fas fa-camera' },
+        { name: 'Labour Attendance', path: '/engineer/attendance', icon: 'fas fa-user-clock' },
+        { name: 'Asset Daily Log', path: '/engineer/assets', icon: 'fas fa-truck-pickup' },
+
+        { header: 'REQUESTS & ISSUES' },
+        { name: 'Stock Request', path: '/engineer/stock', icon: 'fas fa-box-open' },
+        { name: 'Tickets / Issues', path: '/engineer/tickets', icon: 'fas fa-exclamation-circle' },
+        { name: 'Documents', path: '/engineer/documents', icon: 'fas fa-file-alt' },
+        { name: 'Notifications', path: '/engineer/notifications', icon: 'fas fa-bell' },
+    ];
+
+    // Select the correct menu set
+    let activeMenuItems = [];
+    if (role === 'engineer') {
+        activeMenuItems = siteManagerItems;
+    } else {
+        // Filter admin items based on specific role (superadmin vs admin)
+        activeMenuItems = adminItems.filter(item => {
+            if (!item.roles) return true;
+            return item.roles.includes(role);
+        });
+    }
 
     return (
         <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
@@ -60,7 +86,7 @@ const Sidebar = ({ collapsed }) => {
             </div>
 
             <nav className="sidebar-nav">
-                {visibleItems.map((item, index) => {
+                {activeMenuItems.map((item, index) => {
                     if (item.header) {
                         return (
                             <div key={index} className="nav-section-title mt-4 mb-2">
@@ -69,7 +95,7 @@ const Sidebar = ({ collapsed }) => {
                         );
                     }
 
-                    const isActive = location.pathname === item.path;
+                    const isActive = location.pathname === item.path || location.pathname.startsWith(item.path);
                     return (
                         <button
                             key={index}
