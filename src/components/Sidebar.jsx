@@ -1,10 +1,21 @@
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 
 const Sidebar = ({ collapsed }) => {
     const navigate = useNavigate();
     const location = useLocation();
+    const [role, setRole] = useState('superadmin');
 
-    const menuItems = [
+    useEffect(() => {
+        const storedUser = sessionStorage.getItem('currentUser');
+        if (storedUser) {
+            setRole(JSON.parse(storedUser).role);
+        }
+    }, []);
+
+    // Define All Menu Items with 'roles' array indicating who can see them
+    // If no 'roles' property, everyone sees it.
+    const allMenuItems = [
         { header: 'CORE MODULES' },
         { name: 'Dashboard', path: '/dashboard', icon: 'fas fa-tachometer-alt' },
         { name: 'Projects', path: '/projects', icon: 'fas fa-project-diagram' },
@@ -13,25 +24,31 @@ const Sidebar = ({ collapsed }) => {
 
         { header: 'RESOURCES' },
         { name: 'Labour Management', path: '/labour', icon: 'fas fa-users' },
-        { name: 'Asset Management', path: '/assets', icon: 'fas fa-tools' },
+        { name: 'Asset Management', path: '/assets', icon: 'fas fa-tools', roles: ['superadmin', 'admin'] },
         { name: 'Inventory', path: '/inventory', icon: 'fas fa-boxes' },
 
-        { header: 'OPERATIONS' },
-        { name: 'Procurement', path: '/procurement', icon: 'fas fa-shopping-cart' },
-        { name: 'Vendors', path: '/vendors', icon: 'fas fa-handshake' },
-        { name: 'Billing', path: '/billing', icon: 'fas fa-file-invoice-dollar' },
-        { name: 'Expenses', path: '/expenses', icon: 'fas fa-receipt' },
+        { header: 'OPERATIONS', roles: ['superadmin', 'admin'] },
+        { name: 'Procurement', path: '/procurement', icon: 'fas fa-shopping-cart', roles: ['superadmin', 'admin'] },
+        { name: 'Vendors', path: '/vendors', icon: 'fas fa-handshake', roles: ['superadmin', 'admin'] },
+        { name: 'Billing', path: '/billing', icon: 'fas fa-file-invoice-dollar', roles: ['superadmin'] },
+        { name: 'Expenses', path: '/expenses', icon: 'fas fa-receipt', roles: ['superadmin'] },
 
         { header: 'SUPPORT' },
         { name: 'Issue Tickets', path: '/tickets', icon: 'fas fa-ticket-alt' },
-        { name: 'Reports', path: '/reports', icon: 'fas fa-chart-bar' },
+        { name: 'Reports', path: '/reports', icon: 'fas fa-chart-bar', roles: ['superadmin', 'admin'] },
         { name: 'Documents', path: '/documents', icon: 'fas fa-folder' },
 
-        { header: 'ADMINISTRATION' },
-        { name: 'User Management', path: '/users', icon: 'fas fa-users-cog' },
-        { name: 'Notifications', path: '/notifications', icon: 'fas fa-bell' },
-        { name: 'Settings', path: '/settings', icon: 'fas fa-cog' },
+        { header: 'ADMINISTRATION', roles: ['superadmin'] },
+        { name: 'User Management', path: '/users', icon: 'fas fa-users-cog', roles: ['superadmin'] },
+        { name: 'Notifications', path: '/notifications', icon: 'fas fa-bell', roles: ['superadmin'] },
+        { name: 'Settings', path: '/settings', icon: 'fas fa-cog', roles: ['superadmin'] },
     ];
+
+    // Filter Items
+    const visibleItems = allMenuItems.filter(item => {
+        if (!item.roles) return true;
+        return item.roles.includes(role);
+    });
 
     return (
         <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
@@ -43,7 +60,7 @@ const Sidebar = ({ collapsed }) => {
             </div>
 
             <nav className="sidebar-nav">
-                {menuItems.map((item, index) => {
+                {visibleItems.map((item, index) => {
                     if (item.header) {
                         return (
                             <div key={index} className="nav-section-title mt-4 mb-2">
