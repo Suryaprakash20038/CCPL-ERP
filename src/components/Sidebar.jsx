@@ -23,6 +23,8 @@ const Sidebar = ({ collapsed }) => {
         { name: 'Daily Site Logs', path: '/monitoring', icon: 'fas fa-clipboard-list' }, // Renamed from Site Monitoring
 
         { header: 'RESOURCES' },
+        { name: 'Assets', path: '/assets', icon: 'fas fa-tools' },
+        { name: 'Materials & Stock', path: '/inventory', icon: 'fas fa-boxes' },
         { name: 'Labour Management', path: '/labour', icon: 'fas fa-users' },
         { name: 'Asset Management', path: '/assets', icon: 'fas fa-tools', roles: ['superadmin', 'admin'] },
         { name: 'Inventory', path: '/inventory', icon: 'fas fa-boxes' },
@@ -30,8 +32,11 @@ const Sidebar = ({ collapsed }) => {
         { header: 'OPERATIONS', roles: ['superadmin', 'admin'] },
         { name: 'Procurement', path: '/procurement', icon: 'fas fa-shopping-cart', roles: ['superadmin', 'admin'] },
         { name: 'Vendors', path: '/vendors', icon: 'fas fa-handshake', roles: ['superadmin', 'admin'] },
-        { name: 'Billing', path: '/billing', icon: 'fas fa-file-invoice-dollar', roles: ['superadmin'] },
+
+        // Finance section (from teammate)
+        { name: 'Finance & Billing', path: '/billing', icon: 'fas fa-file-invoice-dollar', roles: ['superadmin'] },
         { name: 'Expenses', path: '/expenses', icon: 'fas fa-receipt', roles: ['superadmin'] },
+
 
         { header: 'SUPPORT' },
         { name: 'Issue Tickets', path: '/tickets', icon: 'fas fa-ticket-alt' },

@@ -24,11 +24,14 @@ const Header = ({ onToggleSidebar }) => {
                 <button className="sidebar-toggle" onClick={onToggleSidebar}>
                     <i className="fas fa-bars"></i>
                 </button>
-                <nav className="breadcrumb">
-                    <span className="breadcrumb-item">Home</span>
-                    <i className="fas fa-chevron-right"></i>
-                    <span className="breadcrumb-item active">Dashboard</span>
-                </nav>
+                <div className="search-bar hidden md:flex items-center bg-gray-100 rounded-lg px-3 py-1.5 ml-4">
+                    <i className="fas fa-search text-gray-400 mr-2"></i>
+                    <input 
+                        type="text" 
+                        placeholder="Search projects..." 
+                        className="bg-transparent border-none focus:outline-none text-sm w-48"
+                    />
+                </div>
             </div>
 
             <div className="header-right">
