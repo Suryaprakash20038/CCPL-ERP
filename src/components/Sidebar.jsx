@@ -1,42 +1,46 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { getPendingRequestsCount } from '../utils/assetStore';
 
 const Sidebar = ({ collapsed }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const [role, setRole] = useState('superadmin');
+    const [pendingAssetRequests, setPendingAssetRequests] = useState(0);
 
     useEffect(() => {
         const storedUser = sessionStorage.getItem('currentUser');
         if (storedUser) {
             setRole(JSON.parse(storedUser).role);
         }
+
+        const updateCounts = () => {
+            setPendingAssetRequests(getPendingRequestsCount());
+        };
+
+        updateCounts();
+        const interval = setInterval(updateCounts, 5000);
+        return () => clearInterval(interval);
     }, []);
 
-    // 1. Menu Items for Admins (Super Admin & Project Manager)
-    // We use the 'roles' property to further filter between Super Admin and PM
     const adminItems = [
         { header: 'CORE MODULES' },
         { name: 'Dashboard', path: '/dashboard', icon: 'fas fa-tachometer-alt' },
         { name: 'Projects', path: '/projects', icon: 'fas fa-project-diagram' },
         { name: 'Task Management', path: '/tasks', icon: 'fas fa-tasks' },
-        { name: 'Daily Site Logs', path: '/monitoring', icon: 'fas fa-clipboard-list' }, // Renamed from Site Monitoring
+        { name: 'Daily Site Logs', path: '/monitoring', icon: 'fas fa-clipboard-list' },
 
         { header: 'RESOURCES' },
-        { name: 'Assets', path: '/assets', icon: 'fas fa-tools' },
+        { name: 'Assets', path: '/assets', icon: 'fas fa-tools', roles: ['superadmin', 'admin'] },
+        { name: 'Asset Requests', path: '/admin/asset-requests', icon: 'fas fa-bell-concierge', roles: ['superadmin', 'admin'], showBadge: true },
         { name: 'Materials & Stock', path: '/inventory', icon: 'fas fa-boxes' },
         { name: 'Labour Management', path: '/labour', icon: 'fas fa-users' },
-        { name: 'Asset Management', path: '/assets', icon: 'fas fa-tools', roles: ['superadmin', 'admin'] },
-        { name: 'Inventory', path: '/inventory', icon: 'fas fa-boxes' },
+        { name: 'Manpower Management', path: '/admin/manpower-summary', icon: 'fas fa-users-cog', roles: ['superadmin', 'admin'] },
+        { name: 'Attendance Records', path: '/admin/attendance-records', icon: 'fas fa-clipboard-check', roles: ['superadmin', 'admin'] },
 
         { header: 'OPERATIONS', roles: ['superadmin', 'admin'] },
         { name: 'Procurement', path: '/procurement', icon: 'fas fa-shopping-cart', roles: ['superadmin', 'admin'] },
         { name: 'Vendors', path: '/vendors', icon: 'fas fa-handshake', roles: ['superadmin', 'admin'] },
-
-        // Finance section (from teammate)
-        { name: 'Finance & Billing', path: '/billing', icon: 'fas fa-file-invoice-dollar', roles: ['superadmin'] },
-        { name: 'Expenses', path: '/expenses', icon: 'fas fa-receipt', roles: ['superadmin'] },
-
 
         { header: 'SUPPORT' },
         { name: 'Issue Tickets', path: '/tickets', icon: 'fas fa-ticket-alt' },
@@ -49,17 +53,17 @@ const Sidebar = ({ collapsed }) => {
         { name: 'Settings', path: '/settings', icon: 'fas fa-cog', roles: ['superadmin'] },
     ];
 
-    // 2. Dedicated Menu for Site Engineers (Field View)
     const siteManagerItems = [
         { header: 'SITE EXECUTION' },
         { name: 'My Dashboard', path: '/engineer/dashboard', icon: 'fas fa-home' },
         { name: 'My Projects', path: '/engineer/projects', icon: 'fas fa-hard-hat' },
         { name: 'My Tasks', path: '/engineer/tasks', icon: 'fas fa-clipboard-list' },
+        { name: 'Total Assets Provided', path: '/engineer/assets-provided', icon: 'fas fa-truck-loading' },
 
         { header: 'DAILY UPDATES' },
         { name: 'Daily Task Update', path: '/engineer/updates', icon: 'fas fa-edit' },
+        { name: 'Daily Attendance', path: '/engineer/attendance-log', icon: 'fas fa-clipboard-check' },
         { name: 'Upload Photos', path: '/engineer/photos', icon: 'fas fa-camera' },
-        { name: 'Labour Attendance', path: '/engineer/attendance', icon: 'fas fa-user-clock' },
         { name: 'Asset Daily Log', path: '/engineer/assets', icon: 'fas fa-truck-pickup' },
 
         { header: 'REQUESTS & ISSUES' },
@@ -69,17 +73,7 @@ const Sidebar = ({ collapsed }) => {
         { name: 'Notifications', path: '/engineer/notifications', icon: 'fas fa-bell' },
     ];
 
-    // Select the correct menu set
-    let activeMenuItems = [];
-    if (role === 'engineer') {
-        activeMenuItems = siteManagerItems;
-    } else {
-        // Filter admin items based on specific role (superadmin vs admin)
-        activeMenuItems = adminItems.filter(item => {
-            if (!item.roles) return true;
-            return item.roles.includes(role);
-        });
-    }
+    let activeMenuItems = role === 'engineer' ? siteManagerItems : adminItems.filter(item => !item.roles || item.roles.includes(role));
 
     return (
         <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
@@ -93,11 +87,7 @@ const Sidebar = ({ collapsed }) => {
             <nav className="sidebar-nav">
                 {activeMenuItems.map((item, index) => {
                     if (item.header) {
-                        return (
-                            <div key={index} className="nav-section-title mt-4 mb-2">
-                                {item.header}
-                            </div>
-                        );
+                        return <div key={index} className="nav-section-title mt-4 mb-2">{item.header}</div>;
                     }
 
                     const isActive = location.pathname === item.path || location.pathname.startsWith(item.path);
@@ -109,6 +99,11 @@ const Sidebar = ({ collapsed }) => {
                         >
                             <i className={`${item.icon} w-6 text-center`}></i>
                             <span className="truncate">{item.name}</span>
+                            {item.showBadge && pendingAssetRequests > 0 && (
+                                <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full animate-bounce">
+                                    {pendingAssetRequests}
+                                </span>
+                            )}
                         </button>
                     );
                 })}

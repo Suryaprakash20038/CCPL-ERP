@@ -115,6 +115,53 @@ const Tasks = () => {
         alert('Task Created Successfully!');
     }
 
+    const [showUpdateModal, setShowUpdateModal] = useState(false);
+    const [selectedTask, setSelectedTask] = useState(null);
+
+    const handleUpdateClick = (task) => {
+        setSelectedTask(task);
+        setShowUpdateModal(true);
+    };
+
+    const handleUpdateSubmit = (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const newStatus = formData.get('status');
+        const progress = parseInt(formData.get('progress') || '0');
+
+        // Find current status of selected task to know where to remove it from
+        let currentCategory = '';
+        if (tasks.todo.find(t => t.id === selectedTask.id)) currentCategory = 'todo';
+        else if (tasks.inProgress.find(t => t.id === selectedTask.id)) currentCategory = 'inProgress';
+        else if (tasks.completed.find(t => t.id === selectedTask.id)) currentCategory = 'completed';
+
+        // Create updated task object
+        const updatedTask = {
+            ...selectedTask,
+            progress: progress,
+            priority: formData.get('priority') || selectedTask.priority
+        };
+
+        if (currentCategory === newStatus) {
+            // Same category, just update the item
+            setTasks(prev => ({
+                ...prev,
+                [currentCategory]: prev[currentCategory].map(t => t.id === selectedTask.id ? updatedTask : t)
+            }));
+        } else {
+            // Move category
+            setTasks(prev => ({
+                ...prev,
+                [currentCategory]: prev[currentCategory].filter(t => t.id !== selectedTask.id),
+                [newStatus]: [...prev[newStatus], updatedTask]
+            }));
+        }
+
+        setShowUpdateModal(false);
+        setSelectedTask(null);
+        alert('Task Updated Successfully!');
+    };
+
 
     return (
         <>
@@ -137,12 +184,14 @@ const Tasks = () => {
                         >
                             <i className="fas fa-arrow-left"></i> Back to Projects
                         </button>
-                        <button
-                            onClick={() => setShowModal(true)}
-                            className="btn btn-primary"
-                        >
-                            <i className="fas fa-plus"></i> New Task
-                        </button>
+                        {!isEngineer && (
+                            <button
+                                onClick={() => setShowModal(true)}
+                                className="btn btn-primary"
+                            >
+                                <i className="fas fa-plus"></i> New Task
+                            </button>
+                        )}
                     </div>
                 )}
             </div>
@@ -227,6 +276,16 @@ const Tasks = () => {
                                                 <i className="fas fa-clock mr-1"></i> {task.due}
                                             </div>
                                         </div>
+                                        {isEngineer && (
+                                            <div className="mt-3 flex justify-end">
+                                                <button
+                                                    onClick={() => handleUpdateClick(task)}
+                                                    className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 font-medium transition-colors w-full"
+                                                >
+                                                    Update Progress
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
                             {tasks.todo.filter(t => t.project === selectedProject).length === 0 && (
@@ -271,6 +330,16 @@ const Tasks = () => {
                                                 <i className="fas fa-clock mr-1"></i> {task.due}
                                             </div>
                                         </div>
+                                        {isEngineer && (
+                                            <div className="mt-3 flex justify-end">
+                                                <button
+                                                    onClick={() => handleUpdateClick(task)}
+                                                    className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 font-medium transition-colors w-full"
+                                                >
+                                                    Update Progress
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
                             {tasks.inProgress.filter(t => t.project === selectedProject).length === 0 && (
@@ -331,8 +400,9 @@ const Tasks = () => {
                                         name="project"
                                         value={selectedProject}
                                         onChange={handleProjectChange}
-                                        className="w-full border border-gray-300 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-white"
+                                        className={`w-full border border-gray-300 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-white ${projectsData.length === 1 ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                                         required
+                                        disabled={projectsData.length === 1}
                                     >
                                         <option value="">Choose a project</option>
                                         {projectsData.map((proj, idx) => (
@@ -433,6 +503,79 @@ const Tasks = () => {
                                 <div className="flex justify-end gap-3 pt-4 border-t mt-6">
                                     <button type="button" onClick={() => setShowModal(false)} className="px-5 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium text-sm text-gray-700 transition-colors">Cancel</button>
                                     <button type="submit" className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm shadow-md hover:shadow-lg transition-all">Create Task</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {showUpdateModal && selectedTask && (
+                <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in">
+                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-md flex flex-col">
+                        <div className="flex justify-between items-center px-6 py-4 border-b">
+                            <h3 className="text-lg font-bold text-gray-800">Update Task Progress</h3>
+                            <button onClick={() => setShowUpdateModal(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
+                                <i className="fas fa-times text-xl"></i>
+                            </button>
+                        </div>
+                        <div className="p-6">
+                            <form onSubmit={handleUpdateSubmit} className="space-y-6">
+                                <div>
+                                    <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">Task</p>
+                                    <h4 className="text-xl font-bold text-gray-800">{selectedTask.title}</h4>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-bold text-gray-700 mb-2">Progress (%)</label>
+                                    <div className="flex items-center gap-4">
+                                        <input
+                                            type="range"
+                                            name="progress"
+                                            min="0"
+                                            max="100"
+                                            defaultValue={selectedTask.progress || 0}
+                                            className="grow h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                                            onChange={(e) => {
+                                                const val = e.target.nextElementSibling;
+                                                val.textContent = `${e.target.value}%`;
+                                            }}
+                                        />
+                                        <span className="text-lg font-bold text-blue-600 min-w-[50px]">{selectedTask.progress || 0}%</span>
+                                    </div>
+                                </div>
+
+                                <div className={`grid ${isEngineer ? 'grid-cols-1' : 'grid-cols-2'} gap-4`}>
+                                    <div>
+                                        <label className="block text-sm font-bold text-gray-700 mb-1">Status</label>
+                                        <select
+                                            name="status"
+                                            defaultValue={
+                                                tasks.todo.find(t => t.id === selectedTask.id) ? 'todo' :
+                                                    tasks.inProgress.find(t => t.id === selectedTask.id) ? 'inProgress' : 'completed'
+                                            }
+                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                                        >
+                                            <option value="todo">To Do</option>
+                                            <option value="inProgress">In Progress</option>
+                                            <option value="completed">Completed</option>
+                                        </select>
+                                    </div>
+                                    {!isEngineer && (
+                                        <div>
+                                            <label className="block text-sm font-bold text-gray-700 mb-1">Priority</label>
+                                            <select name="priority" defaultValue={selectedTask.priority} className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                                                <option value="low">Low</option>
+                                                <option value="medium">Medium</option>
+                                                <option value="high">High</option>
+                                                <option value="critical">Critical</option>
+                                            </select>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="flex justify-end gap-3 pt-6 border-t mt-4">
+                                    <button type="button" onClick={() => setShowUpdateModal(false)} className="px-5 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium text-sm text-gray-700 transition-colors">Cancel</button>
+                                    <button type="submit" className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm shadow-md hover:shadow-lg transition-all">Save Changes</button>
                                 </div>
                             </form>
                         </div>
