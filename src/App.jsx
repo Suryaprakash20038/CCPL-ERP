@@ -10,6 +10,7 @@ import Assets from './pages/Assets';
 import Placeholder from './pages/Placeholder';
 import EngineerLayout from './components/EngineerLayout';
 import EngineerDashboard from './pages/engineer/Dashboard';
+import Tickets from './pages/Tickets';
 import './index.css';
 
 function App() {
@@ -32,7 +33,7 @@ function App() {
           <Route path="/vendors" element={<Placeholder title="Vendors" icon="fas fa-handshake" />} />
           <Route path="/billing" element={<Placeholder title="Billing" icon="fas fa-file-invoice-dollar" />} />
           <Route path="/expenses" element={<Placeholder title="Expenses" icon="fas fa-receipt" />} />
-          <Route path="/tickets" element={<Placeholder title="Issue Tickets" icon="fas fa-ticket-alt" />} />
+          <Route path="/tickets" element={<Tickets />} />
           <Route path="/reports" element={<Placeholder title="Reports" icon="fas fa-chart-bar" />} />
           <Route path="/documents" element={<Placeholder title="Documents" icon="fas fa-folder" />} />
           <Route path="/users" element={<Placeholder title="User Management" icon="fas fa-users-cog" />} />
@@ -43,14 +44,14 @@ function App() {
         {/* Site Engineer / Execution Routes */}
         <Route path="/engineer" element={<EngineerLayout />}>
           <Route path="dashboard" element={<EngineerDashboard />} />
-          <Route path="projects" element={<Placeholder title="My Projects" icon="fas fa-hard-hat" />} />
+          <Route path="projects" element={<Projects />} />
           <Route path="tasks" element={<Tasks />} />
-          <Route path="updates" element={<Placeholder title="Daily Progress Update" icon="fas fa-edit" />} />
+          <Route path="updates" element={<Monitoring />} />
           <Route path="photos" element={<Placeholder title="Upload Site Photos" icon="fas fa-camera" />} />
           <Route path="attendance" element={<Placeholder title="Labour Attendance" icon="fas fa-user-clock" />} />
           <Route path="assets" element={<Assets />} />
           <Route path="stock" element={<Inventory />} />
-          <Route path="tickets" element={<Placeholder title="Issue Tickets" icon="fas fa-exclamation-circle" />} />
+          <Route path="tickets" element={<Tickets />} />
           <Route path="documents" element={<Placeholder title="Site Documents" icon="fas fa-file-alt" />} />
           <Route path="notifications" element={<Placeholder title="Notifications" icon="fas fa-bell" />} />
         </Route>
