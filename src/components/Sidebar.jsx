@@ -12,14 +12,14 @@ const Sidebar = ({ collapsed }) => {
         { name: 'Site Monitoring', path: '/monitoring', icon: 'fas fa-eye' },
 
         { header: 'RESOURCES' },
+        { name: 'Assets', path: '/assets', icon: 'fas fa-tools' },
+        { name: 'Materials & Stock', path: '/inventory', icon: 'fas fa-boxes' },
         { name: 'Labour Management', path: '/labour', icon: 'fas fa-users' },
-        { name: 'Asset Management', path: '/assets', icon: 'fas fa-tools' },
-        { name: 'Inventory', path: '/inventory', icon: 'fas fa-boxes' },
 
         { header: 'OPERATIONS' },
         { name: 'Procurement', path: '/procurement', icon: 'fas fa-shopping-cart' },
         { name: 'Vendors', path: '/vendors', icon: 'fas fa-handshake' },
-        { name: 'Billing', path: '/billing', icon: 'fas fa-file-invoice-dollar' },
+        { name: 'Finance & Billing', path: '/billing', icon: 'fas fa-file-invoice-dollar' },
         { name: 'Expenses', path: '/expenses', icon: 'fas fa-receipt' },
 
         { header: 'SUPPORT' },
