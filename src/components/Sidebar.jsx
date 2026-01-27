@@ -1,19 +1,17 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { getPendingRequestsCount } from '../utils/assetStore';
+import { useAuth } from '../context/AuthContext';
 
 const Sidebar = ({ collapsed }) => {
     const navigate = useNavigate();
     const location = useLocation();
-    const [role, setRole] = useState('superadmin');
+    const { user } = useAuth(); // User from context
     const [pendingAssetRequests, setPendingAssetRequests] = useState(0);
 
-    useEffect(() => {
-        const storedUser = sessionStorage.getItem('currentUser');
-        if (storedUser) {
-            setRole(JSON.parse(storedUser).role);
-        }
+    const role = user?.role || 'GUEST';
 
+    useEffect(() => {
         const updateCounts = () => {
             setPendingAssetRequests(getPendingRequestsCount());
         };
@@ -30,39 +28,39 @@ const Sidebar = ({ collapsed }) => {
         { name: 'Task Management', path: '/tasks', icon: 'fas fa-tasks' },
         { name: 'Daily Site Logs', path: '/monitoring', icon: 'fas fa-clipboard-list' },
 
+        { header: 'USER ADMINISTRATION', roles: ['SUPER_ADMIN', 'ADMIN'] },
+        { name: 'User Management', path: '/users', icon: 'fas fa-users-cog', roles: ['SUPER_ADMIN', 'ADMIN'] },
+
         { header: 'RESOURCES' },
         {
             name: 'Assets',
             path: '/assets',
             icon: 'fas fa-tools',
-            roles: ['superadmin', 'admin']
+            roles: ['SUPER_ADMIN', 'ADMIN']
         },
         {
             name: 'Asset Requests',
             path: '/admin/asset-requests',
             icon: 'fas fa-bell-concierge',
-            roles: ['superadmin', 'admin'],
+            roles: ['SUPER_ADMIN', 'ADMIN'],
             showBadge: true
         },
 
         { name: 'Materials & Stock', path: '/inventory', icon: 'fas fa-boxes' },
-        { name: 'Labour Management', path: '/labour', icon: 'fas fa-users' },
-        { name: 'Manpower Management', path: '/admin/manpower-summary', icon: 'fas fa-users-cog', roles: ['superadmin', 'admin'] },
-        { name: 'Attendance Records', path: '/admin/attendance-records', icon: 'fas fa-clipboard-check', roles: ['superadmin', 'admin'] },
+        { name: 'Manpower Management', path: '/admin/manpower-summary', icon: 'fas fa-users-cog', roles: ['SUPER_ADMIN', 'ADMIN'] },
+        { name: 'Attendance Records', path: '/admin/attendance-records', icon: 'fas fa-clipboard-check', roles: ['SUPER_ADMIN', 'ADMIN'] },
 
-        { header: 'OPERATIONS', roles: ['superadmin', 'admin'] },
-        { name: 'Procurement', path: '/procurement', icon: 'fas fa-shopping-cart', roles: ['superadmin', 'admin'] },
-        { name: 'Vendors', path: '/vendors', icon: 'fas fa-handshake', roles: ['superadmin', 'admin'] },
+        { header: 'OPERATIONS', roles: ['SUPER_ADMIN', 'ADMIN'] },
+        { name: 'Vendors & Contractors', path: '/vendors', icon: 'fas fa-handshake', roles: ['SUPER_ADMIN', 'ADMIN'] },
 
         { header: 'SUPPORT' },
         { name: 'Issue Tickets', path: '/tickets', icon: 'fas fa-ticket-alt' },
-        { name: 'Reports', path: '/reports', icon: 'fas fa-chart-bar', roles: ['superadmin', 'admin'] },
+        { name: 'Reports', path: '/reports', icon: 'fas fa-chart-bar', roles: ['SUPER_ADMIN', 'ADMIN'] },
         { name: 'Documents', path: '/documents', icon: 'fas fa-folder' },
 
-        { header: 'ADMINISTRATION', roles: ['superadmin'] },
-        { name: 'User Management', path: '/users', icon: 'fas fa-users-cog', roles: ['superadmin'] },
-        { name: 'Notifications', path: '/notifications', icon: 'fas fa-bell', roles: ['superadmin'] },
-        { name: 'Settings', path: '/settings', icon: 'fas fa-cog', roles: ['superadmin'] },
+        { header: 'SYSTEM', roles: ['SUPER_ADMIN'] },
+        { name: 'Notifications', path: '/notifications', icon: 'fas fa-bell', roles: ['SUPER_ADMIN'] },
+        { name: 'Settings', path: '/settings', icon: 'fas fa-cog', roles: ['SUPER_ADMIN'] },
     ];
 
     const siteManagerItems = [
@@ -86,7 +84,7 @@ const Sidebar = ({ collapsed }) => {
         { name: 'Notifications', path: '/engineer/notifications', icon: 'fas fa-bell' },
     ];
 
-    let activeMenuItems = role === 'engineer' ? siteManagerItems : adminItems.filter(item => !item.roles || item.roles.includes(role));
+    let activeMenuItems = role === 'SITE_ENGINEER' ? siteManagerItems : adminItems.filter(item => !item.roles || item.roles.includes(role));
 
     return (
         <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
