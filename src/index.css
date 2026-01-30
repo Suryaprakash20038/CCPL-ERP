@@ -6,17 +6,17 @@
 
 /* CSS Variables */
 :root {
-  --primary-color: #3b82f6;
-  --primary-dark: #2563eb;
+  --primary-color: #2563EB;
+  --primary-dark: #1d4ed8;
   --secondary-color: #64748b;
-  --accent-color: #3b82f6;
-  --success-color: #3b82f6;
-  --warning-color: #3b82f6;
-  --danger-color: #3b82f6;
+  --accent-color: #2563EB;
+  --success-color: #22C55E;
+  --warning-color: #F59E0B;
+  --danger-color: #EF4444;
   --info-color: #3b82f6;
 
   --white: #ffffff;
-  --light-gray: #f8fafc;
+  --light-gray: #F8FAFC;
   --gray-100: #f1f5f9;
   --gray-200: #e2e8f0;
   --gray-300: #cbd5e1;
@@ -25,9 +25,13 @@
   --gray-600: #475569;
   --gray-700: #334155;
   --gray-800: #1e293b;
-  --gray-900: #0f172a;
+  --gray-900: #0F172A;
+
+  --text-main: #111827;
 
   --sidebar-width: 280px;
+  --sidebar-bg: #0F172A;
+  --sidebar-text: #F8FAFC;
   --header-height: 70px;
   --border-radius: 8px;
   --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
@@ -42,7 +46,9 @@
   }
 
   body {
-    @apply font-sans text-base leading-relaxed text-gray-700 bg-gray-50;
+    @apply font-sans text-base leading-relaxed bg-gray-50;
+    color: var(--text-main);
+    background-color: var(--light-gray);
   }
 
   h1,
@@ -84,7 +90,7 @@
   /* Login Page Styles */
   .login-page {
     @apply min-h-screen flex items-center justify-center p-4;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #2563EB 0%, #1e40af 100%);
   }
 
   .login-container {
@@ -221,7 +227,9 @@
 
   .sidebar {
     width: var(--sidebar-width);
-    @apply bg-white border-r border-gray-200 fixed top-0 left-0 h-screen overflow-y-auto z-[1000] transition-all;
+    background-color: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    @apply border-r border-gray-900 fixed top-0 left-0 h-screen overflow-y-auto z-[1000] transition-all;
     box-shadow: var(--shadow);
   }
 
@@ -250,15 +258,15 @@
 
   /* Sidebar Styles */
   .sidebar-header {
-    @apply p-6 border-b border-gray-200;
+    @apply p-6 border-b border-gray-800;
   }
 
   .sidebar-logo {
-    @apply flex items-center gap-3 text-lg font-bold text-primary;
+    @apply flex items-center gap-3 text-lg font-bold text-white;
   }
 
   .sidebar-logo i {
-    @apply text-2xl;
+    @apply text-2xl text-blue-500;
   }
 
   .sidebar.collapsed .sidebar-logo span {
@@ -274,7 +282,7 @@
   }
 
   .nav-section-title {
-    @apply text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-4;
+    @apply text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-4;
   }
 
   .sidebar.collapsed .nav-section-title {
@@ -282,15 +290,16 @@
   }
 
   .nav-link {
-    @apply flex items-center gap-3 px-4 py-3 text-gray-600 no-underline transition-all border-l-4 border-transparent text-sm;
+    @apply flex items-center gap-3 px-4 py-3 text-gray-400 no-underline transition-all border-l-4 border-transparent text-sm;
   }
 
   .nav-link:hover {
-    @apply bg-gray-100 text-primary border-l-primary;
+    @apply bg-gray-800 text-white border-l-blue-500;
   }
 
   .nav-link.active {
-    @apply bg-primary text-white border-l-primary-dark;
+    background: linear-gradient(90deg, rgba(37, 99, 235, 0.2) 0%, rgba(37, 99, 235, 0) 100%);
+    @apply text-blue-400 border-l-blue-500 font-medium;
   }
 
   .nav-link i {

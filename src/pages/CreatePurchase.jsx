@@ -21,11 +21,14 @@ const CreatePurchase = () => {
     }, []);
 
     const fetchVendors = async () => {
-        const res = await fetch('http://localhost:5000/api/vendors', {
-            headers: { 'Authorization': `Bearer ${user.token}` }
-        });
-        const data = await res.json();
-        setVendors(Array.isArray(data) ? data : []);
+        // Mock fetch
+        const stored = localStorage.getItem('mock_vendors');
+        if (stored) {
+            setVendors(JSON.parse(stored));
+        } else {
+            // Fallback if empty
+            setVendors([]);
+        }
     };
 
     const handleVendorChange = (e) => {
@@ -33,7 +36,6 @@ const CreatePurchase = () => {
         setVendorId(vId);
         const vendor = vendors.find(v => v._id === vId);
         setSelectedVendor(vendor);
-        // Reset items possibly, or try to match if keeping
     };
 
     const handleItemChange = (index, field, value) => {
@@ -42,8 +44,7 @@ const CreatePurchase = () => {
 
         // Auto Calc
         if (selectedVendor && field === 'materialName') {
-            // Auto fill unit and price
-            const mat = selectedVendor.materials.find(m => m.name === value);
+            const mat = selectedVendor.materials ? selectedVendor.materials.find(m => m.name === value) : null;
             if (mat) {
                 newItems[index].unit = mat.unit;
                 newItems[index].unitPrice = mat.pricePerUnit;
@@ -84,31 +85,24 @@ const CreatePurchase = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        // Mock Submit
         const payload = {
-            vendorId,
-            project: projectId, // Just string for now
+            _id: 'PO-MOCK-' + Date.now(),
+            poNumber: 'PO-' + Math.floor(Math.random() * 10000),
+            createdAt: new Date().toISOString(),
+            status: 'Pending',
+            project: projectId,
+            vendorId, // In real app, we might need vendor name here for display
             items,
             grandTotal
         };
 
-        try {
-            const res = await fetch('http://localhost:5000/api/purchases', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${user.token}`
-                },
-                body: JSON.stringify(payload)
-            });
-            if (res.ok) {
-                alert('Purchase Order Created Successfully!');
-                navigate('/vendors');
-            } else {
-                alert('Error creating PO');
-            }
-        } catch (err) {
-            console.error(err);
-        }
+        // Ensure mock_purchases exists
+        const purchases = JSON.parse(localStorage.getItem('mock_purchases') || '[]');
+        localStorage.setItem('mock_purchases', JSON.stringify([...purchases, payload]));
+
+        alert('Purchase Order Created Successfully (Mock)');
+        navigate('/vendors');
     };
 
     return (

@@ -7,22 +7,20 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
-    const { login } = useAuth();
+    const { login, loginAsRole } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
-        const result = await login(username, password); // username is email here
+        const result = await login(username, password);
 
         if (result.success) {
-            // Navigation happens based on user role which will be checked in App.jsx or redirected here
-            // Let's get the user from context? Or handle strictly.
-            // Since context updates async, we might need to rely on the returned data or wait.
-            // But for now, let's redirect.
             const storedUser = JSON.parse(localStorage.getItem('userInfo'));
             if (storedUser.role === 'SITE_ENGINEER') {
                 navigate('/engineer/dashboard');
+            } else if (storedUser.role === 'SUPER_ADMIN') {
+                navigate('/super-admin');
             } else {
                 navigate('/dashboard');
             }
@@ -31,18 +29,16 @@ const Login = () => {
         }
     };
 
-    const handleDemoLogin = (role) => {
-        if (role === 'superadmin') {
-            setUsername('admin@ccpl.com');
-            setPassword('admin');
-        } else if (role === 'admin') {
-            setUsername('admin.manager@ccpl.com'); // Example credential
-            setPassword('password123');
-            setError('Note: Ensure this Admin user has been created by the Super Admin first.');
-        } else if (role === 'engineer') {
-            setUsername('site.engineer@ccpl.com'); // Example credential
-            setPassword('password123');
-            setError('Note: Ensure this Site Engineer user has been created by an Admin first.');
+    const handleRoleLogin = async (role) => {
+        const result = await loginAsRole(role);
+        if (result.success) {
+            if (role === 'SUPER_ADMIN') {
+                navigate('/super-admin');
+            } else if (role === 'ADMIN') {
+                navigate('/dashboard');
+            } else if (role === 'SITE_ENGINEER') {
+                navigate('/engineer/dashboard');
+            }
         }
     };
 
@@ -50,27 +46,35 @@ const Login = () => {
         <div className="login-page">
             <div className="login-container">
                 <div className="login-card">
-                    <div className="logo-section">
-                        <h1><i className="fas fa-hard-hat"></i> CCPL Construction ERP</h1>
+                    <div className="logo-section py-6">
+                        <h1><i className="fas fa-hard-hat"></i> Construction ERP</h1>
                         <p>Enterprise Resource Planning for Construction</p>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="login-form">
+                    <form onSubmit={handleSubmit} className="p-6">
                         {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">{error}</div>}
-                        <div className="form-group">
-                            <label htmlFor="username">Email ID</label>
-                            <input type="email" id="username" value={username} onChange={(e) => setUsername(e.target.value)} required />
+
+                        <div className="mb-4">
+                            <label htmlFor="username" className="block mb-2 font-semibold text-gray-700">Email ID</label>
+                            <input
+                                type="email"
+                                id="username"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                                placeholder="admin.manager@ccpl.com"
+                                className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg text-base transition-all bg-white focus:outline-none focus:border-blue-600 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.1)]"
+                            />
                         </div>
-                        <div className="form-group">
-                            <label htmlFor="password">Password</label>
+                        <div className="mb-6">
+                            <label htmlFor="password" className="block mb-2 font-semibold text-gray-700">Password</label>
                             <div className="relative">
                                 <input
                                     type={showPassword ? "text" : "password"}
                                     id="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                    className="w-full pr-10" // Add padding for icon
+                                    placeholder="••••••••••"
+                                    className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg text-base transition-all bg-white focus:outline-none focus:border-blue-600 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.1)] pr-10"
                                 />
                                 <button
                                     type="button"
@@ -81,21 +85,33 @@ const Login = () => {
                                 </button>
                             </div>
                         </div>
-                        <button type="submit" className="btn btn-primary btn-full">
+                        <button type="submit" className="btn btn-primary w-full py-3 text-base font-semibold mb-6">
                             <i className="fas fa-sign-in-alt"></i> Login
                         </button>
 
-                        <div className="demo-accounts">
-                            <h4><i className="fas fa-id-badge text-gray-400"></i> Access</h4>
-                            <div className="demo-options flex flex-col gap-2">
-                                <button type="button" className="btn btn-outline flex items-center justify-center gap-2 w-full hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200" onClick={() => handleDemoLogin('superadmin')}>
-                                    <i className="fas fa-crown"></i> Fill Super Admin Credentials
+                        <div className="border-t border-gray-200 pt-4">
+                            <h4 className="text-center mb-3 text-gray-600 text-sm font-semibold"><i className="fas fa-id-badge text-gray-400"></i> Access</h4>
+                            <div className="flex flex-col gap-2">
+                                <button
+                                    type="button"
+                                    className="btn btn-outline flex items-center justify-center gap-2 w-full hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200 py-2"
+                                    onClick={() => handleRoleLogin('SUPER_ADMIN')}
+                                >
+                                    <i className="fas fa-crown"></i> Login as Super Admin (1-Click)
                                 </button>
-                                <button type="button" className="btn btn-outline flex items-center justify-center gap-2 w-full hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200" onClick={() => handleDemoLogin('admin')}>
-                                    <i className="fas fa-user-tie"></i> Fill Admin Credentials
+                                <button
+                                    type="button"
+                                    className="btn btn-outline flex items-center justify-center gap-2 w-full hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 py-2"
+                                    onClick={() => handleRoleLogin('ADMIN')}
+                                >
+                                    <i className="fas fa-user-tie"></i> Login as Admin (1-Click)
                                 </button>
-                                <button type="button" className="btn btn-outline flex items-center justify-center gap-2 w-full hover:bg-green-50 hover:text-green-700 hover:border-green-200" onClick={() => handleDemoLogin('engineer')}>
-                                    <i className="fas fa-hard-hat"></i> Fill Site Engineer Credentials
+                                <button
+                                    type="button"
+                                    className="btn btn-outline flex items-center justify-center gap-2 w-full hover:bg-green-50 hover:text-green-700 hover:border-green-200 py-2"
+                                    onClick={() => handleRoleLogin('SITE_ENGINEER')}
+                                >
+                                    <i className="fas fa-hard-hat"></i> Login as Site Engineer (1-Click)
                                 </button>
                             </div>
                         </div>

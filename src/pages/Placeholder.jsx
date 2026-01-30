@@ -22,7 +22,7 @@ const Placeholder = ({ title, icon }) => {
                     </div>
                     <h3 className="text-2xl font-bold text-gray-800 mb-2">{title} Module</h3>
                     <p className="text-gray-500 max-w-md mx-auto">
-                        This feature is part of the full CCPL ERP suite. It will be implemented in the next phase of development with full React functionality.
+                        This feature is part of the full Construction ERP suite. It will be implemented in the next phase of development with full React functionality.
                     </p>
                     <button className="btn btn-primary mt-8">
                         <i className="fas fa-bell"></i> Notify when ready

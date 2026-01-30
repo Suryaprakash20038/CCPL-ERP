@@ -13,6 +13,7 @@ import UserManagement from './pages/UserManagement';
 
 import EngineerLayout from './components/EngineerLayout';
 import EngineerDashboard from './pages/engineer/Dashboard';
+import SuperAdminDashboard from './pages/SuperAdminDashboard';
 import AssetsProvided from './pages/engineer/AssetsProvided';
 import Attendance from './pages/engineer/Attendance';
 
@@ -36,6 +37,7 @@ function App() {
         {/* ADMIN / SUPER ADMIN ROUTES */}
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/super-admin" element={<SuperAdminDashboard />} />
           <Route path="/projects" element={<Projects />} />
           <Route path="/tasks" element={<Tasks />} />
           <Route path="/inventory" element={<Inventory />} />

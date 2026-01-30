@@ -22,28 +22,28 @@ const UserManagement = () => {
 
     const fetchAdmins = async () => {
         setLoading(true);
-        try {
-            const res = await fetch('http://localhost:5000/api/users/admins', {
-                headers: { Authorization: `Bearer ${user.token}` }
-            });
-            const data = await res.json();
-            setUsers(data);
-        } catch (err) {
-            console.error(err);
+        // Mock fetch
+        const stored = JSON.parse(localStorage.getItem('mock_admins') || '[]');
+        if (stored.length === 0) {
+            const initial = [{ _id: 'a1', name: 'Default Admin', email: 'admin@ccpl.com', role: 'ADMIN', status: 'Active' }];
+            localStorage.setItem('mock_admins', JSON.stringify(initial));
+            setUsers(initial);
+        } else {
+            setUsers(stored);
         }
         setLoading(false);
     };
 
     const fetchEngineers = async () => {
         setLoading(true);
-        try {
-            const res = await fetch('http://localhost:5000/api/users/site-engineers', {
-                headers: { Authorization: `Bearer ${user.token}` }
-            });
-            const data = await res.json();
-            setUsers(data);
-        } catch (err) {
-            console.error(err);
+        // Mock fetch
+        const stored = JSON.parse(localStorage.getItem('mock_engineers') || '[]');
+        if (stored.length === 0) {
+            const initial = [{ _id: 'e1', name: 'Site Eng 1', email: 'eng1@ccpl.com', role: 'SITE_ENGINEER', status: 'Active' }];
+            localStorage.setItem('mock_engineers', JSON.stringify(initial));
+            setUsers(initial);
+        } else {
+            setUsers(stored);
         }
         setLoading(false);
     };
@@ -55,6 +55,11 @@ const UserManagement = () => {
 
         const res = await registerAdmin(data, user.token);
         if (res.success) {
+            // Mock: Add to LS
+            const newAdmin = { ...data, _id: 'a' + Date.now(), role: 'ADMIN', status: 'Active' };
+            const admins = JSON.parse(localStorage.getItem('mock_admins') || '[]');
+            localStorage.setItem('mock_admins', JSON.stringify([...admins, newAdmin]));
+
             setMessage('Admin created successfully!');
             setShowForm(false);
             fetchAdmins();
@@ -105,6 +110,11 @@ const UserManagement = () => {
 
         const res = await registerSiteEngineer(fullData, user.token);
         if (res.success) {
+            // Mock: Add to LS
+            const newEng = { ...fullData, _id: 'e' + Date.now(), name: fullData.name, email: fullData.email, role: 'SITE_ENGINEER', status: 'Active' };
+            const engs = JSON.parse(localStorage.getItem('mock_engineers') || '[]');
+            localStorage.setItem('mock_engineers', JSON.stringify([...engs, newEng]));
+
             setMessage('Site Engineer created successfully!');
             setShowForm(false);
             fetchEngineers();

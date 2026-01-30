@@ -18,15 +18,21 @@ const Vendors = () => {
         fetchVendors();
     }, []);
 
+    // Mock Initial Data
+    const INITIAL_VENDORS = [
+        { _id: 'v1', name: 'UltraTech Cement', code: 'VEN-001', category: 'Cement', address: 'Plot 4, Ind. Area', contact: { mobile: '9876543210', email: 'sales@ultratech.com' }, status: 'Active', totalPurchaseValue: 450000, rating: 4.8 },
+        { _id: 'v2', name: 'Tata Steel', code: 'VEN-002', category: 'Steel', address: 'Jamshedpur', contact: { mobile: '8765432109', email: 'sales@tatasteel.com' }, status: 'Active', totalPurchaseValue: 1200000, rating: 4.9 },
+        { _id: 'v3', name: 'Local Hardware Store', code: 'VEN-003', category: 'Hardware', address: 'City Market', contact: { mobile: '7654321098', email: 'contact@localhw.com' }, status: 'Active', totalPurchaseValue: 25000, rating: 4.2 },
+    ];
+
     const fetchVendors = async () => {
-        try {
-            const res = await fetch('http://localhost:5000/api/vendors', {
-                headers: { 'Authorization': `Bearer ${user.token}` }
-            });
-            const data = await res.json();
-            setVendors(Array.isArray(data) ? data : []);
-        } catch (error) {
-            console.error(error);
+        // Mock fetch
+        const stored = localStorage.getItem('mock_vendors');
+        if (stored) {
+            setVendors(JSON.parse(stored));
+        } else {
+            setVendors(INITIAL_VENDORS);
+            localStorage.setItem('mock_vendors', JSON.stringify(INITIAL_VENDORS));
         }
     };
 
@@ -35,8 +41,8 @@ const Vendors = () => {
         const formData = new FormData(e.target);
         const data = Object.fromEntries(formData.entries());
 
-        // Structure the data to match backend expectation
-        const payload = {
+        const newVendor = {
+            _id: 'v' + Date.now(),
             name: data.name,
             code: data.code,
             category: data.category,
@@ -45,23 +51,16 @@ const Vendors = () => {
                 mobile: data.mobile,
                 email: data.email
             },
-            status: 'Active'
+            status: 'Active',
+            totalPurchaseValue: 0,
+            rating: 0
         };
 
-        try {
-            await fetch('http://localhost:5000/api/vendors', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${user.token}`
-                },
-                body: JSON.stringify(payload)
-            });
-            setShowForm(false);
-            fetchVendors();
-        } catch (error) {
-            alert('Failed to create vendor');
-        }
+        const updatedVendors = [...vendors, newVendor];
+        setVendors(updatedVendors);
+        localStorage.setItem('mock_vendors', JSON.stringify(updatedVendors));
+        setShowForm(false);
+        alert('Vendor created successfully (Local Mock)');
     };
 
     return (

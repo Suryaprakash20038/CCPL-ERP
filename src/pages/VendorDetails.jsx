@@ -16,16 +16,38 @@ const VendorDetails = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Get Vendor
-                const vRes = await fetch(`http://localhost:5000/api/vendors/${id}`, { headers: { 'Authorization': `Bearer ${user.token}` } });
-                const vData = await vRes.json();
-                setVendor(vData);
-                setMaterials(vData.materials || []);
+                // Mock Fetch Vendor
+                await new Promise(r => setTimeout(r, 300));
+                const allVendors = JSON.parse(localStorage.getItem('mock_vendors') || '[]');
+                const foundVendor = allVendors.find(v => v._id === id);
 
-                // Get Purchases (History)
-                const pRes = await fetch(`http://localhost:5000/api/purchases/vendor/${id}`, { headers: { 'Authorization': `Bearer ${user.token}` } });
-                const pData = await pRes.json();
-                setPurchases(pData);
+                if (foundVendor) {
+                    setVendor(foundVendor);
+                    setMaterials(foundVendor.materials || []);
+                } else {
+                    setVendor({
+                        _id: id, name: 'Mock Vendor ' + id, code: 'MOCK-001', category: 'General',
+                        contact: { mobile: '0000000000', email: 'mock@vendor.com' },
+                        address: 'Mock Address', status: 'Active', totalPurchaseValue: 0, rating: 0
+                    });
+                }
+
+                // Mock Fetch Purchases
+                const allPurchases = JSON.parse(localStorage.getItem('mock_purchases') || '[]');
+                let vPurchases = allPurchases.filter(p => p.vendorId === id);
+
+                if (vPurchases.length === 0) {
+                    // Fallback static data if no custom purchases found
+                    vPurchases = [
+                        {
+                            _id: 'p1', poNumber: 'PO-2023-001', createdAt: new Date().toISOString(),
+                            project: 'Skyline Towers', vendorId: id,
+                            grandTotal: 50000, status: 'Approved',
+                            items: [{ materialName: 'Cement', quantity: 100, unit: 'Bags', unitPrice: 400, baseAmount: 40000, gstAmount: 7200, totalAmount: 47200 }]
+                        }
+                    ];
+                }
+                setPurchases(vPurchases);
 
                 setLoading(false);
             } catch (e) { console.error(e); }
@@ -36,20 +58,24 @@ const VendorDetails = () => {
     const handleAddMaterial = async (e) => {
         e.preventDefault();
         const data = Object.fromEntries(new FormData(e.target));
-        // Simple conversion
         data.pricePerUnit = parseFloat(data.pricePerUnit);
         data.gst = parseFloat(data.gst);
 
-        try {
-            const res = await fetch(`http://localhost:5000/api/vendors/${id}/materials`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${user.token}` },
-                body: JSON.stringify(data)
-            });
-            const updatedVendor = await res.json();
-            setMaterials(updatedVendor.materials);
-            setShowMaterialForm(false);
-        } catch (e) { alert('Error adding material'); }
+        // Update local mock data
+        const allVendors = JSON.parse(localStorage.getItem('mock_vendors') || '[]');
+        const updatedVendors = allVendors.map(v => {
+            if (v._id === id) {
+                const newMaterials = [...(v.materials || []), data];
+                v.materials = newMaterials;
+                setMaterials(newMaterials); // Update state
+                return v;
+            }
+            return v;
+        });
+
+        localStorage.setItem('mock_vendors', JSON.stringify(updatedVendors));
+        setShowMaterialForm(false);
+        alert('Material added (Local Mock)');
     };
 
     // Helper to format items for summary

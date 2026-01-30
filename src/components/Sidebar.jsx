@@ -8,6 +8,10 @@ const Sidebar = ({ collapsed }) => {
     const location = useLocation();
     const { user } = useAuth(); // User from context
     const [pendingAssetRequests, setPendingAssetRequests] = useState(0);
+    const [isHovered, setIsHovered] = useState(false);
+
+    // Determines if the sidebar is visually expanded (either actively open OR hovered while collapsed)
+    const isExpanded = !collapsed || isHovered;
 
     const role = user?.role || 'GUEST';
 
@@ -23,6 +27,7 @@ const Sidebar = ({ collapsed }) => {
 
     const adminItems = [
         { header: 'CORE MODULES' },
+        { name: 'Executive Dashboard', path: '/super-admin', icon: 'fas fa-chart-line', roles: ['SUPER_ADMIN'] },
         { name: 'Dashboard', path: '/dashboard', icon: 'fas fa-tachometer-alt' },
         { name: 'Projects', path: '/projects', icon: 'fas fa-project-diagram' },
         { name: 'Task Management', path: '/tasks', icon: 'fas fa-tasks' },
@@ -87,18 +92,27 @@ const Sidebar = ({ collapsed }) => {
     let activeMenuItems = role === 'SITE_ENGINEER' ? siteManagerItems : adminItems.filter(item => !item.roles || item.roles.includes(role));
 
     return (
-        <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
+        <aside
+            className={`sidebar ${!isExpanded ? 'collapsed' : ''}`}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
             <div className="sidebar-header">
                 <div className="sidebar-logo">
                     <i className="fas fa-hard-hat text-2xl"></i>
-                    <span className="font-bold text-xl tracking-tight">CCPL ERP</span>
-                </div>
+                    {isExpanded && (
+                        <span className="font-bold text-xl tracking-tight transition-opacity duration-300">Construction ERP</span>
+                    )}</div>
             </div>
 
             <nav className="sidebar-nav">
                 {activeMenuItems.map((item, index) => {
                     if (item.header) {
-                        return <div key={index} className="nav-section-title mt-4 mb-2">{item.header}</div>;
+                        return (
+                            <div key={index} className={`nav-section-title mt-4 mb-2 ${!isExpanded ? 'hidden' : 'block'}`}>
+                                {item.header}
+                            </div>
+                        );
                     }
 
                     const isActive = location.pathname === item.path || location.pathname.startsWith(item.path);
@@ -107,11 +121,12 @@ const Sidebar = ({ collapsed }) => {
                             key={index}
                             onClick={() => navigate(item.path)}
                             className={`nav-link w-full text-left ${isActive ? 'active' : ''}`}
+                            title={!isExpanded ? item.name : ''}
                         >
                             <i className={`${item.icon} w-6 text-center`}></i>
-                            <span className="truncate">{item.name}</span>
+                            <span className={`truncate ${!isExpanded ? 'hidden' : 'block'}`}>{item.name}</span>
                             {item.showBadge && pendingAssetRequests > 0 && (
-                                <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full animate-bounce">
+                                <span className={`ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full animate-bounce ${!isExpanded ? 'hidden' : ''}`}>
                                     {pendingAssetRequests}
                                 </span>
                             )}
