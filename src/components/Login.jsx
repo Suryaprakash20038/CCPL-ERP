@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
@@ -9,6 +9,19 @@ const Login = () => {
     const [error, setError] = useState('');
     const { login, loginAsRole } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
+
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const roleParam = params.get('role');
+
+        if (roleParam === 'engineer') {
+            setUsername('site.engineer@ccpl.com');
+            // Optional: Auto-login for demo purposes or just pre-fill
+        } else if (roleParam === 'admin') {
+            setUsername('admin.manager@ccpl.com');
+        }
+    }, [location]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();

@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import Home from './pages/Home';
 import Login from './components/Login';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
@@ -32,7 +33,8 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
 
         {/* ADMIN / SUPER ADMIN ROUTES */}
         <Route element={<Layout />}>
